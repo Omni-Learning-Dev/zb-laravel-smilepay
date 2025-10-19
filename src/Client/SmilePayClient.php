@@ -65,8 +65,9 @@ class SmilePayClient
 
             return $body;
         } catch (GuzzleException $e) {
-            $this->logError($endpoint, $e);
-            throw $this->handleException($e, $endpoint, 'POST');
+            $exception = $this->handleException($e, $endpoint, 'POST');
+            $this->logSmilePayException($exception);
+            throw $exception;
         }
     }
 
@@ -93,8 +94,9 @@ class SmilePayClient
 
             return $body;
         } catch (GuzzleException $e) {
-            $this->logError($endpoint, $e);
-            throw $this->handleException($e, $endpoint, 'GET');
+            $exception = $this->handleException($e, $endpoint, 'GET');
+            $this->logSmilePayException($exception);
+            throw $exception;
         }
     }
 
@@ -136,34 +138,36 @@ class SmilePayClient
     }
 
     /**
-     * Log API errors
+     * Log SmilePay exceptions with user-friendly messages
      *
-     * @param string $endpoint
-     * @param \Throwable $exception
+     * @param SmilePayException $exception
      * @return void
      */
-    protected function logError(string $endpoint, \Throwable $exception): void
+    protected function logSmilePayException(SmilePayException $exception): void
     {
         if (!$this->loggingEnabled) {
             return;
         }
 
+        $context = $exception->getContext();
         $logData = [
-            'message' => $exception->getMessage(),
-            'code' => $exception->getCode(),
-            'endpoint' => $endpoint,
+            'message' => $exception->getMessage(), // User-friendly message
+            'status_code' => $exception->getCode(),
+            'endpoint' => $context['endpoint'] ?? 'unknown',
+            'method' => $context['method'] ?? 'unknown',
         ];
 
-        // Add response details for RequestException
-        if ($exception instanceof \GuzzleHttp\Exception\RequestException) {
-            $response = $exception->getResponse();
-            if ($response) {
-                $logData['status_code'] = $response->getStatusCode();
-                $logData['response_body'] = (string) $response->getBody();
-            }
+        // Add raw response for debugging (if available)
+        if (isset($context['raw_response'])) {
+            $logData['raw_response'] = $context['raw_response'];
         }
 
-        Log::channel($this->logChannel)->error("SmilePay API Error: {$endpoint}", $logData);
+        // Add any other context information
+        if (isset($context['error'])) {
+            $logData['error_type'] = $context['error'];
+        }
+
+        Log::channel($this->logChannel)->error("SmilePay API Error: {$logData['endpoint']}", $logData);
     }
 
     /**
