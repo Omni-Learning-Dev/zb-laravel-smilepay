@@ -421,40 +421,180 @@ class PaymentController extends Controller
 
 ### Error Handling
 
+The package provides comprehensive error handling with user-friendly error messages:
+
 ```php
+use Emmanuelsiziba\SmilePay\Exceptions\SmilePayException;
 use Emmanuelsiziba\SmilePay\Exceptions\PaymentException;
 
 try {
-    $response = SmilePay::expressCheckout()->ecocash([...]);
-} catch (PaymentException $e) {
-    Log::error('Payment failed: ' . $e->getMessage());
+    $response = SmilePay::expressCheckout()->ecocash([
+        'amount' => 50.00,
+        'itemName' => 'Product Purchase',
+        'ecocashMobile' => '0771234567',
+    ]);
 
-    // Get additional context
+    if ($response->isSuccessful()) {
+        // Handle successful initiation
+    }
+} catch (PaymentException $e) {
+    // Payment validation or business logic errors
+    Log::error('Payment validation failed: ' . $e->getMessage());
+
+    // Get additional context (API response details)
     $context = $e->getContext();
 
-    return back()->withErrors(['payment' => $e->getMessage()]);
+    return back()->withErrors([
+        'payment' => $e->getMessage()
+    ]);
+} catch (SmilePayException $e) {
+    // API communication errors (network, authentication, etc.)
+    Log::error('SmilePay API error', [
+        'message' => $e->getMessage(),
+        'code' => $e->getCode(),
+        'context' => $e->getContext(),
+    ]);
+
+    return back()->withErrors([
+        'payment' => 'Unable to process payment. Please try again later.'
+    ]);
 }
 ```
 
+#### Common Error Scenarios
+
+**404 Not Found Error**
+```php
+try {
+    $response = SmilePay::expressCheckout()->ecocash([...]);
+} catch (SmilePayException $e) {
+    // User-friendly message:
+    // "Endpoint not found: The payment method or endpoint '/payments/express-checkout/ecocash'
+    // is not available. Please verify the API endpoint or contact support."
+
+    if ($e->getCode() === 404) {
+        // Check if you're using the correct environment
+        // Verify the endpoint is available in your environment
+        Log::warning('Payment endpoint not available', $e->getContext());
+        return back()->with('warning', 'This payment method is currently unavailable.');
+    }
+}
+```
+
+**Authentication Error (401)**
+```php
+try {
+    $response = SmilePay::expressCheckout()->innbucks([...]);
+} catch (SmilePayException $e) {
+    if ($e->getCode() === 401) {
+        // "Authentication failed: Invalid API credentials.
+        // Please check your SmilePay configuration."
+
+        Log::critical('Invalid SmilePay credentials');
+        return back()->withErrors(['payment' => 'Payment system configuration error.']);
+    }
+}
+```
+
+**Network/Connection Error**
+```php
+try {
+    $response = SmilePay::standardCheckout()->initiate([...]);
+} catch (SmilePayException $e) {
+    // "Connection error: Unable to connect to SmilePay API.
+    // Please check your internet connection and try again."
+
+    Log::error('SmilePay connection failed', [
+        'message' => $e->getMessage(),
+        'context' => $e->getContext(),
+    ]);
+
+    return back()->withErrors([
+        'payment' => 'Connection issue. Please check your internet and try again.'
+    ]);
+}
+```
+
+#### Error Context
+
+All exceptions include a context array with debugging information:
+
+```php
+try {
+    $response = SmilePay::expressCheckout()->ecocash([...]);
+} catch (SmilePayException $e) {
+    $context = $e->getContext();
+
+    // Context includes:
+    // - endpoint: The API endpoint that failed
+    // - method: HTTP method (GET/POST)
+    // - status_code: HTTP status code (if available)
+    // - raw_response: Full API response (if available)
+
+    Log::error('SmilePay error details', [
+        'endpoint' => $context['endpoint'] ?? 'unknown',
+        'status' => $context['status_code'] ?? 'N/A',
+        'response' => $context['raw_response'] ?? 'No response',
+    ]);
+}
+```
+
+#### Best Practices
+
+1. **Always catch exceptions** when initiating payments
+2. **Log errors with context** for debugging
+3. **Show user-friendly messages** to customers
+4. **Handle specific error codes** differently (404, 401, 500, etc.)
+5. **Enable logging** in `config/smilepay.php` for production debugging
+
 ## Troubleshooting
+
+### 404 Not Found Error
+
+If you encounter a 404 error when initiating payments:
+
+```
+Endpoint not found: The payment method or endpoint '/payments/express-checkout/ecocash'
+is not available. Please verify the API endpoint or contact support.
+```
+
+**Possible causes:**
+- **Wrong environment**: You may be using sandbox credentials with a production base URL (or vice versa)
+- **Endpoint not available**: The specific payment method may not be enabled for your account
+- **Incorrect base URL**: Check your `SMILEPAY_ENVIRONMENT` setting in `.env`
+
+**Solutions:**
+1. Verify your environment setting:
+   ```env
+   SMILEPAY_ENVIRONMENT=sandbox  # or 'production'
+   ```
+2. Ensure your API credentials match the environment
+3. Check if the payment method is enabled in your SmilePay merchant dashboard
+4. Enable logging to see the full request details:
+   ```env
+   SMILEPAY_LOGGING=true
+   ```
 
 ### API Credentials Not Working
 
 - Ensure you're using the correct environment (sandbox/production)
 - Verify API keys are generated from the correct environment
 - Check for any whitespace in your `.env` file
+- Confirm credentials have the required permissions
 
 ### Webhook Not Receiving Callbacks
 
 - Ensure your `resultUrl` is publicly accessible (use ngrok for local testing)
 - Check that the route is registered: `php artisan route:list | grep smilepay`
 - Verify webhook middleware in `config/smilepay.php`
+- Check your server's firewall allows incoming requests
 
 ### Payment Status Not Updating
 
 - Always poll the status API in addition to webhook callbacks
 - Implement retry logic for failed webhook deliveries
 - Use Laravel queues for webhook processing
+- Check your application logs for webhook processing errors
 
 ## Changelog
 

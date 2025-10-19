@@ -66,11 +66,7 @@ class SmilePayClient
             return $body;
         } catch (GuzzleException $e) {
             $this->logError($endpoint, $e);
-            throw new SmilePayException(
-                "SmilePay API request failed: {$e->getMessage()}",
-                $e->getCode(),
-                $e
-            );
+            throw $this->handleException($e, $endpoint, 'POST');
         }
     }
 
@@ -98,11 +94,7 @@ class SmilePayClient
             return $body;
         } catch (GuzzleException $e) {
             $this->logError($endpoint, $e);
-            throw new SmilePayException(
-                "SmilePay API request failed: {$e->getMessage()}",
-                $e->getCode(),
-                $e
-            );
+            throw $this->handleException($e, $endpoint, 'GET');
         }
     }
 
@@ -156,10 +148,102 @@ class SmilePayClient
             return;
         }
 
-        Log::channel($this->logChannel)->error("SmilePay API Error: {$endpoint}", [
+        $logData = [
             'message' => $exception->getMessage(),
             'code' => $exception->getCode(),
-        ]);
+            'endpoint' => $endpoint,
+        ];
+
+        // Add response details for RequestException
+        if ($exception instanceof \GuzzleHttp\Exception\RequestException) {
+            $response = $exception->getResponse();
+            if ($response) {
+                $logData['status_code'] = $response->getStatusCode();
+                $logData['response_body'] = (string) $response->getBody();
+            }
+        }
+
+        Log::channel($this->logChannel)->error("SmilePay API Error: {$endpoint}", $logData);
+    }
+
+    /**
+     * Handle Guzzle exceptions and convert them to user-friendly SmilePayExceptions
+     *
+     * @param GuzzleException $exception
+     * @param string $endpoint
+     * @param string $method
+     * @return SmilePayException
+     */
+    protected function handleException(GuzzleException $exception, string $endpoint, string $method): SmilePayException
+    {
+        $statusCode = 0;
+        $errorMessage = 'An unexpected error occurred while communicating with SmilePay API.';
+        $context = [
+            'endpoint' => $endpoint,
+            'method' => $method,
+        ];
+
+        // Handle different types of Guzzle exceptions
+        if ($exception instanceof \GuzzleHttp\Exception\RequestException) {
+            $response = $exception->getResponse();
+
+            if ($response) {
+                $statusCode = $response->getStatusCode();
+                $context['status_code'] = $statusCode;
+
+                // Try to get a readable error message from the response
+                $responseBody = (string) $response->getBody();
+                $context['raw_response'] = $responseBody;
+
+                // Try to decode JSON error response
+                $jsonError = json_decode($responseBody, true);
+                if (json_last_error() === JSON_ERROR_NONE && isset($jsonError['message'])) {
+                    $errorMessage = $jsonError['message'];
+                } elseif (json_last_error() === JSON_ERROR_NONE && isset($jsonError['error'])) {
+                    $errorMessage = is_string($jsonError['error']) ? $jsonError['error'] : ($jsonError['error']['message'] ?? $errorMessage);
+                } else {
+                    // Provide user-friendly messages based on status code
+                    $errorMessage = $this->getStatusCodeMessage($statusCode, $endpoint);
+                }
+            } else {
+                $errorMessage = "Network error: Unable to reach SmilePay API. Please check your internet connection.";
+                $context['error'] = 'No response received from server';
+            }
+        } elseif ($exception instanceof \GuzzleHttp\Exception\ConnectException) {
+            $errorMessage = "Connection error: Unable to connect to SmilePay API. Please check your internet connection and try again.";
+            $context['error'] = 'Connection failed';
+        } elseif ($exception instanceof \GuzzleHttp\Exception\ServerException) {
+            $errorMessage = "Server error: SmilePay API is currently experiencing issues. Please try again later.";
+            $context['error'] = 'Server error';
+        }
+
+        return new SmilePayException($errorMessage, $statusCode, $exception, $context);
+    }
+
+    /**
+     * Get user-friendly message based on HTTP status code
+     *
+     * @param int $statusCode
+     * @param string $endpoint
+     * @return string
+     */
+    protected function getStatusCodeMessage(int $statusCode, string $endpoint): string
+    {
+        return match ($statusCode) {
+            400 => "Bad request: The payment request is invalid. Please check your payment details and try again.",
+            401 => "Authentication failed: Invalid API credentials. Please check your SmilePay configuration.",
+            403 => "Access denied: You don't have permission to access this resource. Please verify your API credentials.",
+            404 => "Endpoint not found: The payment method or endpoint '{$endpoint}' is not available. Please verify the API endpoint or contact support.",
+            405 => "Method not allowed: The requested operation is not supported for this endpoint.",
+            408 => "Request timeout: The request took too long to process. Please try again.",
+            422 => "Validation error: The payment data provided is invalid. Please check all required fields.",
+            429 => "Rate limit exceeded: Too many requests. Please wait a moment and try again.",
+            500 => "Server error: SmilePay API encountered an internal error. Please try again later.",
+            502 => "Bad gateway: SmilePay API is temporarily unavailable. Please try again in a few moments.",
+            503 => "Service unavailable: SmilePay API is currently down for maintenance. Please try again later.",
+            504 => "Gateway timeout: The request timed out. Please try again.",
+            default => "SmilePay API error (HTTP {$statusCode}): An unexpected error occurred. Please try again or contact support."
+        };
     }
 
     /**
