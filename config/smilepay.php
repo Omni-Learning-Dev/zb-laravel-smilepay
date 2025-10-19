@@ -33,8 +33,8 @@ return [
     |
     */
     'base_url' => [
-        'sandbox' => 'https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway',
-        'production' => 'https://zbnet.zb.co.zw/wallet_gateway/payments-gateway',
+        'sandbox' => 'https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway/',
+        'production' => 'https://zbnet.zb.co.zw/wallet_gateway/payments-gateway/',
     ],
 
     /*
