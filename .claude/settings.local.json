@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git tag -a v0.1.0 -m \"Initial release v0.1.0 - SmilePay Laravel package\")",
+      "Bash(git push origin v0.1.0)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
