@@ -1,10 +1,10 @@
 <?php
 
-namespace YourVendor\SmilePay\Events;
+namespace Emmanuelsiziba\SmilePay\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use YourVendor\SmilePay\DataObjects\TransactionStatus;
+use Emmanuelsiziba\SmilePay\DataObjects\TransactionStatus;
 
 class PaymentFailed
 {

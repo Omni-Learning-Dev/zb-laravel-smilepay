@@ -1,16 +1,16 @@
 <?php
 
-namespace YourVendor\SmilePay\Facades;
+namespace Emmanuelsiziba\SmilePay\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \YourVendor\SmilePay\Services\StandardCheckout standardCheckout()
- * @method static \YourVendor\SmilePay\Services\ExpressCheckout expressCheckout()
- * @method static \YourVendor\SmilePay\Services\PaymentUtility utility()
- * @method static \YourVendor\SmilePay\Client\SmilePayClient client()
+ * @method static \Emmanuelsiziba\SmilePay\Services\StandardCheckout standardCheckout()
+ * @method static \Emmanuelsiziba\SmilePay\Services\ExpressCheckout expressCheckout()
+ * @method static \Emmanuelsiziba\SmilePay\Services\PaymentUtility utility()
+ * @method static \Emmanuelsiziba\SmilePay\Client\SmilePayClient client()
  *
- * @see \YourVendor\SmilePay\SmilePay
+ * @see \Emmanuelsiziba\SmilePay\SmilePay
  */
 class SmilePay extends Facade
 {

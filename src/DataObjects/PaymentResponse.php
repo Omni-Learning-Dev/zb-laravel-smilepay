@@ -1,6 +1,6 @@
 <?php
 
-namespace YourVendor\SmilePay\DataObjects;
+namespace Emmanuelsiziba\SmilePay\DataObjects;
 
 class PaymentResponse
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace YourVendor\SmilePay\Services;
+namespace Emmanuelsiziba\SmilePay\Services;
 
-use YourVendor\SmilePay\Client\SmilePayClient;
-use YourVendor\SmilePay\Exceptions\PaymentException;
-use YourVendor\SmilePay\DataObjects\PaymentResponse;
+use Emmanuelsiziba\SmilePay\Client\SmilePayClient;
+use Emmanuelsiziba\SmilePay\Exceptions\PaymentException;
+use Emmanuelsiziba\SmilePay\DataObjects\PaymentResponse;
 
 class StandardCheckout
 {

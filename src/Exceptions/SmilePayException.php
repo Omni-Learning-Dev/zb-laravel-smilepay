@@ -1,6 +1,6 @@
 <?php
 
-namespace YourVendor\SmilePay\Exceptions;
+namespace Emmanuelsiziba\SmilePay\Exceptions;
 
 use Exception;
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace YourVendor\SmilePay;
+namespace Emmanuelsiziba\SmilePay;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
-use YourVendor\SmilePay\Client\SmilePayClient;
-use YourVendor\SmilePay\Services\StandardCheckout;
-use YourVendor\SmilePay\Services\ExpressCheckout;
-use YourVendor\SmilePay\Services\PaymentUtility;
+use Emmanuelsiziba\SmilePay\Client\SmilePayClient;
+use Emmanuelsiziba\SmilePay\Services\StandardCheckout;
+use Emmanuelsiziba\SmilePay\Services\ExpressCheckout;
+use Emmanuelsiziba\SmilePay\Services\PaymentUtility;
 
 class SmilePayServiceProvider extends ServiceProvider
 {

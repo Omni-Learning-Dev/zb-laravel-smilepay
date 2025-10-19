@@ -219,7 +219,7 @@ SMILEPAY_FAILURE_URL=https://yourdomain.com/payment/failed
 ### Quick Start
 
 ```php
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 // Standard checkout
 $response = SmilePay::standardCheckout()->initiate([
@@ -266,7 +266,7 @@ if ($status->isPaid()) {
 
 ## Installation Steps
 
-1. `composer require yourvendor/laravel-smilepay`
+1. `composer require emmanuelsiziba/zb-laravel-smilepay`
 2. `php artisan vendor:publish --tag=smilepay-config`
 3. Configure `.env` with API credentials
 4. Listen to payment events in EventServiceProvider
@@ -307,4 +307,4 @@ The package is designed for easy extension:
 
 **Version**: 1.0.0
 **License**: MIT
-**Author**: Your Name
+**Author**: Emmanuel Siziba

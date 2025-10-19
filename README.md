@@ -2,9 +2,9 @@
 
 A comprehensive Laravel package for integrating **SmilePay Payment Gateway** (ZB Bank Zimbabwe) into your Laravel application. This package supports multiple payment methods including Ecocash, Innbucks, Omari, SmileCash, and Visa/Mastercard.
 
-[![Latest Version](https://img.shields.io/packagist/v/yourvendor/laravel-smilepay.svg?style=flat-square)](https://packagist.org/packages/yourvendor/laravel-smilepay)
-[![Total Downloads](https://img.shields.io/packagist/dt/yourvendor/laravel-smilepay.svg?style=flat-square)](https://packagist.org/packages/yourvendor/laravel-smilepay)
-[![License](https://img.shields.io/packagist/l/yourvendor/laravel-smilepay.svg?style=flat-square)](https://packagist.org/packages/yourvendor/laravel-smilepay)
+[![Latest Version](https://img.shields.io/packagist/v/emmanuelsiziba/zb-laravel-smilepay.svg?style=flat-square)](https://packagist.org/packages/emmanuelsiziba/zb-laravel-smilepay)
+[![Total Downloads](https://img.shields.io/packagist/dt/emmanuelsiziba/zb-laravel-smilepay.svg?style=flat-square)](https://packagist.org/packages/emmanuelsiziba/zb-laravel-smilepay)
+[![License](https://img.shields.io/packagist/l/emmanuelsiziba/zb-laravel-smilepay.svg?style=flat-square)](https://packagist.org/packages/emmanuelsiziba/zb-laravel-smilepay)
 
 ## Features
 
@@ -44,7 +44,7 @@ A comprehensive Laravel package for integrating **SmilePay Payment Gateway** (ZB
 Install the package via Composer:
 
 ```bash
-composer require yourvendor/laravel-smilepay
+composer require emmanuelsiziba/zb-laravel-smilepay
 ```
 
 ### Publish Configuration
@@ -99,7 +99,7 @@ SMILEPAY_LOG_CHANNEL=stack
 Standard Checkout redirects customers to a SmilePay hosted payment page.
 
 ```php
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 $response = SmilePay::standardCheckout()->initiate([
     'amount' => 100.00,
@@ -124,7 +124,7 @@ Express Checkout allows you to build custom payment UIs.
 #### Ecocash
 
 ```php
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 $response = SmilePay::expressCheckout()->ecocash([
     'amount' => 50.00,
@@ -231,7 +231,7 @@ if ($response->requires3DS()) {
 #### Check Payment Status
 
 ```php
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 $status = SmilePay::utility()->checkStatus('SP-ABC123-1234567890');
 
@@ -286,7 +286,7 @@ Create event listeners in `app/Listeners`:
 // app/Listeners/HandlePaymentReceived.php
 namespace App\Listeners;
 
-use YourVendor\SmilePay\Events\PaymentReceived;
+use Emmanuelsiziba\SmilePay\Events\PaymentReceived;
 
 class HandlePaymentReceived
 {
@@ -307,9 +307,9 @@ class HandlePaymentReceived
 Register the listener in `app/Providers/EventServiceProvider.php`:
 
 ```php
-use YourVendor\SmilePay\Events\PaymentReceived;
-use YourVendor\SmilePay\Events\PaymentFailed;
-use YourVendor\SmilePay\Events\PaymentCanceled;
+use Emmanuelsiziba\SmilePay\Events\PaymentReceived;
+use Emmanuelsiziba\SmilePay\Events\PaymentFailed;
+use Emmanuelsiziba\SmilePay\Events\PaymentCanceled;
 
 protected $listen = [
     PaymentReceived::class => [
@@ -402,8 +402,8 @@ $response = SmilePay::standardCheckout()->initiate([
 ### Using Dependency Injection
 
 ```php
-use YourVendor\SmilePay\Services\StandardCheckout;
-use YourVendor\SmilePay\Services\ExpressCheckout;
+use Emmanuelsiziba\SmilePay\Services\StandardCheckout;
+use Emmanuelsiziba\SmilePay\Services\ExpressCheckout;
 
 class PaymentController extends Controller
 {
@@ -422,7 +422,7 @@ class PaymentController extends Controller
 ### Error Handling
 
 ```php
-use YourVendor\SmilePay\Exceptions\PaymentException;
+use Emmanuelsiziba\SmilePay\Exceptions\PaymentException;
 
 try {
     $response = SmilePay::expressCheckout()->ecocash([...]);
@@ -470,7 +470,7 @@ If you discover any security-related issues, please email security@example.com i
 
 ## Credits
 
-- [Your Name](https://github.com/yourusername)
+- [Emmanuel Siziba](https://github.com/yourusername)
 - [All Contributors](../../contributors)
 
 ## License
@@ -480,7 +480,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 ## Support
 
 - **Documentation**: [SmilePay Official Docs](https://docs.smilepay.id/)
-- **Issues**: [GitHub Issues](https://github.com/yourvendor/laravel-smilepay/issues)
+- **Issues**: [GitHub Issues](https://github.com/emmanuelsiziba/zb-laravel-smilepay/issues)
 - **Email**: support@example.com
 
 ---

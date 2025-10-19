@@ -22,8 +22,8 @@ Route::get('/payment/return', [CheckoutController::class, 'return'])->name('paym
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use YourVendor\SmilePay\Facades\SmilePay;
-use YourVendor\SmilePay\Exceptions\PaymentException;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Exceptions\PaymentException;
 
 class CheckoutController extends Controller
 {
@@ -119,7 +119,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 class OrderController extends Controller
 {
@@ -166,7 +166,7 @@ namespace App\Listeners;
 
 use App\Models\Order;
 use App\Notifications\OrderConfirmation;
-use YourVendor\SmilePay\Events\PaymentReceived;
+use Emmanuelsiziba\SmilePay\Events\PaymentReceived;
 
 class HandlePaymentReceived
 {
@@ -204,7 +204,7 @@ class HandlePaymentReceived
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 class SubscriptionController extends Controller
 {
@@ -261,7 +261,7 @@ Route::middleware('auth:sanctum')->group(function () {
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 class MobilePaymentController extends Controller
 {
@@ -443,7 +443,7 @@ public function requestRefund(Order $order)
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use YourVendor\SmilePay\Facades\SmilePay;
+use Emmanuelsiziba\SmilePay\Facades\SmilePay;
 
 class PaymentTest extends TestCase
 {
@@ -472,4 +472,4 @@ class PaymentTest extends TestCase
 
 ## More Examples
 
-For more examples, visit the [GitHub repository](https://github.com/yourvendor/laravel-smilepay) or check the [official documentation](https://docs.smilepay.id/).
+For more examples, visit the [GitHub repository](https://github.com/emmanuelsiziba/zb-laravel-smilepay) or check the [official documentation](https://docs.smilepay.id/).

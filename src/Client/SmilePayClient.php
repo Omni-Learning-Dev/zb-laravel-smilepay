@@ -1,11 +1,11 @@
 <?php
 
-namespace YourVendor\SmilePay\Client;
+namespace Emmanuelsiziba\SmilePay\Client;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
-use YourVendor\SmilePay\Exceptions\SmilePayException;
+use Emmanuelsiziba\SmilePay\Exceptions\SmilePayException;
 
 class SmilePayClient
 {

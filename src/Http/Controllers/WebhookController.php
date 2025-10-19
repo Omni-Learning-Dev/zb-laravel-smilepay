@@ -1,15 +1,15 @@
 <?php
 
-namespace YourVendor\SmilePay\Http\Controllers;
+namespace Emmanuelsiziba\SmilePay\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Event;
-use YourVendor\SmilePay\Events\PaymentReceived;
-use YourVendor\SmilePay\Events\PaymentFailed;
-use YourVendor\SmilePay\Events\PaymentCanceled;
-use YourVendor\SmilePay\DataObjects\TransactionStatus;
+use Emmanuelsiziba\SmilePay\Events\PaymentReceived;
+use Emmanuelsiziba\SmilePay\Events\PaymentFailed;
+use Emmanuelsiziba\SmilePay\Events\PaymentCanceled;
+use Emmanuelsiziba\SmilePay\DataObjects\TransactionStatus;
 
 class WebhookController
 {

@@ -32,21 +32,21 @@
     },
     "autoload": {
         "psr-4": {
-            "YourVendor\\SmilePay\\": "src/"
+            "Emmanuelsiziba\\SmilePay\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "YourVendor\\SmilePay\\Tests\\": "tests/"
+            "Emmanuelsiziba\\SmilePay\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "emmanuelsiziba\\SmilePay\\SmilePayServiceProvider"
+                "Emmanuelsiziba\\SmilePay\\SmilePayServiceProvider"
             ],
             "aliases": {
-                "SmilePay": "emmanuelsiziba\\SmilePay\\Facades\\SmilePay"
+                "SmilePay": "Emmanuelsiziba\\SmilePay\\Facades\\SmilePay"
             }
         }
     },
