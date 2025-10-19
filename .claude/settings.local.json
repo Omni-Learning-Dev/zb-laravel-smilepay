@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(git tag -a v0.1.0 -m \"Initial release v0.1.0 - SmilePay Laravel package\")",
-      "Bash(git push origin v0.1.0)"
+      "Bash(git push origin v0.1.0)",
+      "Bash(git add composer.json)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd support for Laravel 12\n\nUpdated package dependencies to support Laravel 12:\n- illuminate/support: Added ^12.0\n- orchestra/testbench: Added ^10.0\n- phpunit/phpunit: Added ^11.0\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push)",
+      "Bash(git tag -a v0.1.1 -m \"Release v0.1.1 - Add Laravel 12 support\")",
+      "Bash(git push origin v0.1.1)"
     ],
     "deny": [],
     "ask": []
