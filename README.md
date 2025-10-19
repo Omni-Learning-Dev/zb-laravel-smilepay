@@ -562,15 +562,25 @@ is not available. Please verify the API endpoint or contact support.
 - **Wrong environment**: You may be using sandbox credentials with a production base URL (or vice versa)
 - **Endpoint not available**: The specific payment method may not be enabled for your account
 - **Incorrect base URL**: Check your `SMILEPAY_ENVIRONMENT` setting in `.env`
+- **Outdated package version**: Versions prior to v0.1.5 had URL construction issues with Guzzle
 
 **Solutions:**
-1. Verify your environment setting:
+1. **Update to the latest version** (recommended):
+   ```bash
+   composer update emmanuelsiziba/zb-laravel-smilepay
+   ```
+   This fixes a critical bug where leading slashes in endpoints caused Guzzle to treat them as absolute paths when the base URL has a trailing slash.
+
+2. Verify your environment setting:
    ```env
    SMILEPAY_ENVIRONMENT=sandbox  # or 'production'
    ```
-2. Ensure your API credentials match the environment
-3. Check if the payment method is enabled in your SmilePay merchant dashboard
-4. Enable logging to see the full request details:
+
+3. Ensure your API credentials match the environment
+
+4. Check if the payment method is enabled in your SmilePay merchant dashboard
+
+5. Enable logging to see the full request details:
    ```env
    SMILEPAY_LOGGING=true
    ```

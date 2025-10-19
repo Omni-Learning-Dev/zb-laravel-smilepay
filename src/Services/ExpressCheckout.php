@@ -26,7 +26,7 @@ class ExpressCheckout
     {
         $payload = $this->buildBasePayload($data);
 
-        $response = $this->client->post('/payments/express-checkout/innbucks', $payload);
+        $response = $this->client->post('payments/express-checkout/innbucks', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
@@ -57,7 +57,7 @@ class ExpressCheckout
             'ecocashMobile' => $data['ecocashMobile'],
         ]);
 
-        $response = $this->client->post('/payments/express-checkout/ecocash', $payload);
+        $response = $this->client->post('payments/express-checkout/ecocash', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
@@ -88,7 +88,7 @@ class ExpressCheckout
             'omariMobile' => $data['omariMobile'],
         ]);
 
-        $response = $this->client->post('/payments/express-checkout/omari', $payload);
+        $response = $this->client->post('payments/express-checkout/omari', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
@@ -119,7 +119,7 @@ class ExpressCheckout
             'omariMobile' => $omariMobile,
         ];
 
-        $response = $this->client->post('/payments/express-checkout/omari/confirmation', $payload);
+        $response = $this->client->post('payments/express-checkout/omari/confirmation', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
@@ -150,7 +150,7 @@ class ExpressCheckout
             'smileCashMobile' => $data['smileCashMobile'],
         ]);
 
-        $response = $this->client->post('/payments/express-checkout/smilecash', $payload);
+        $response = $this->client->post('payments/express-checkout/smilecash', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
@@ -181,7 +181,7 @@ class ExpressCheckout
             'smileCashMobile' => $smileCashMobile,
         ];
 
-        $response = $this->client->post('/payments/express-checkout/smilecash/confirmation', $payload);
+        $response = $this->client->post('payments/express-checkout/smilecash/confirmation', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
@@ -219,7 +219,7 @@ class ExpressCheckout
             'paymentMethod' => $data['paymentMethod'] ?? 'CARD',
         ]);
 
-        $response = $this->client->post('/payments/express-checkout/mpgs', $payload);
+        $response = $this->client->post('payments/express-checkout/mpgs', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(

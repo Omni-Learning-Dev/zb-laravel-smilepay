@@ -25,7 +25,7 @@ class PaymentUtility
     public function checkStatus(string $orderReference): TransactionStatus
     {
         try {
-            $response = $this->client->get("/payments/transaction/{$orderReference}/status/check");
+            $response = $this->client->get("payments/transaction/{$orderReference}/status/check");
 
             return new TransactionStatus($response);
         } catch (\Exception $e) {
@@ -47,7 +47,7 @@ class PaymentUtility
     public function cancel(string $orderReference): array
     {
         try {
-            $response = $this->client->post("/payments/cancel/{$orderReference}");
+            $response = $this->client->post("payments/cancel/{$orderReference}");
 
             if (isset($response['success']) && !$response['success']) {
                 throw new PaymentException(

@@ -26,7 +26,7 @@ class StandardCheckout
     {
         $payload = $this->buildPayload($data);
 
-        $response = $this->client->post('/payments/initiate-transaction', $payload);
+        $response = $this->client->post('payments/initiate-transaction', $payload);
 
         if (isset($response['responseCode']) && $response['responseCode'] !== '00') {
             throw new PaymentException(
