@@ -12,6 +12,9 @@ A comprehensive Laravel package for integrating **SmilePay Payment Gateway** (ZB
 ✅ **Standard Checkout** – Hosted payment page integration
 ✅ **Express Checkout** – Direct API integration for custom UIs
 ✅ **Webhook Handling** – Automatic payment status callbacks
+✅ **Auto-Configured Callbacks** – No manual URL setup required; the package registers and wires its own routes
+✅ **Built-in Return Handler** – `/smilepay/return` polls status, fires events, and redirects the user
+✅ **Dual-App Return URLs** – Route mobile deep-links and web redirects independently via a `platform` param
 ✅ **Transaction Management** – Check status, cancel payments
 ✅ **Event System** – Laravel events for payment notifications
 ✅ **Sandbox & Production** – Easy environment switching
@@ -22,6 +25,8 @@ A comprehensive Laravel package for integrating **SmilePay Payment Gateway** (ZB
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [How Callbacks Work](#how-callbacks-work)
+- [App Return URLs](#app-return-urls)
 - [Usage](#usage)
   - [Standard Checkout](#standard-checkout)
   - [Express Checkout](#express-checkout)
@@ -61,21 +66,46 @@ This will create a `config/smilepay.php` configuration file.
 
 ### Environment Variables
 
-Add the following to your `.env` file:
+The minimum configuration needed is just your credentials:
 
 ```env
 SMILEPAY_ENVIRONMENT=sandbox
 SMILEPAY_API_KEY=your_api_key_here
 SMILEPAY_API_SECRET=your_api_secret_here
 SMILEPAY_DEFAULT_CURRENCY=840
+```
 
-# Optional URLs
-SMILEPAY_RETURN_URL=https://yourdomain.com/payment/return
-SMILEPAY_RESULT_URL=https://yourdomain.com/smilepay/webhook
-SMILEPAY_CANCEL_URL=https://yourdomain.com/payment/cancel
-SMILEPAY_FAILURE_URL=https://yourdomain.com/payment/failed
+The package automatically registers and wires its own callback routes (`/smilepay/webhook` and `/smilepay/return`), so **you do not need to set `SMILEPAY_RETURN_URL`, `SMILEPAY_RESULT_URL`, `SMILEPAY_CANCEL_URL`, or `SMILEPAY_FAILURE_URL`** unless you want to override the defaults.
 
-# Logging (optional)
+#### Optional: App Return URLs
+
+After the hosted checkout completes, the package's `/smilepay/return` route will redirect your user. Configure where to send them:
+
+```env
+# Single app (web or mobile)
+SMILEPAY_APP_RETURN_URL=https://yourapp.com/payments/return
+
+# OR — separate URLs for mobile deep-links and web redirects
+SMILEPAY_MOBILE_RETURN_URL=yourapp://payments/return
+SMILEPAY_WEB_RETURN_URL=https://yourapp.com/payments/return
+```
+
+If none of these are set, the `/smilepay/return` route returns a JSON response instead of redirecting.
+
+#### Optional: Override Callback URLs
+
+Only set these if you need to point to a custom handler instead of the package's built-in routes:
+
+```env
+SMILEPAY_RETURN_URL=https://yourdomain.com/custom/return
+SMILEPAY_RESULT_URL=https://yourdomain.com/custom/webhook
+SMILEPAY_CANCEL_URL=https://yourdomain.com/custom/cancel
+SMILEPAY_FAILURE_URL=https://yourdomain.com/custom/failed
+```
+
+#### Logging (optional)
+
+```env
 SMILEPAY_LOGGING=true
 SMILEPAY_LOG_CHANNEL=stack
 ```
@@ -91,6 +121,88 @@ SMILEPAY_LOG_CHANNEL=stack
 2. Navigate to **Settings > API Keys**
 3. Click **Generate New API Key**
 4. Copy your API Key and API Secret
+
+## How Callbacks Work
+
+When the package is installed, its service provider automatically:
+
+1. Registers two routes in your application:
+   - `POST /smilepay/webhook` — ZB calls this server-to-server to notify you of a payment result
+   - `GET  /smilepay/return`  — ZB redirects the customer here after the hosted checkout page
+
+2. Populates `returnUrl`, `resultUrl`, `cancelUrl`, and `failureUrl` on every payment request using `url('/smilepay/return')` and `url('/smilepay/webhook')` as defaults, so you never need to set them manually.
+
+### What `/smilepay/return` Does
+
+When ZB redirects the customer back to your server, this built-in controller:
+
+1. Reads the `orderReference` from the query string
+2. Polls ZB for the definitive payment status
+3. Fires the appropriate package event (`PaymentReceived`, `PaymentFailed`, or `PaymentCanceled`)
+4. Redirects the user to your configured app return URL (with `?status=&orderReference=` appended), or returns JSON if no URL is configured
+
+---
+
+## App Return URLs
+
+Use app return URLs to send the customer back to your application after the hosted checkout.
+
+### Single Application
+
+```env
+SMILEPAY_APP_RETURN_URL=https://yourapp.com/payments/return
+```
+
+The customer will be redirected to:
+```
+https://yourapp.com/payments/return?status=success&orderReference=SP-ABC123
+```
+
+### Mobile App + Web App (Dual Platform)
+
+If you serve both a mobile app (deep link) and a web app, configure separate URLs:
+
+```env
+SMILEPAY_MOBILE_RETURN_URL=yourapp://payments/return
+SMILEPAY_WEB_RETURN_URL=https://yourapp.com/payments/return
+```
+
+Then signal the platform when initiating a payment by appending `?platform=mobile` or `?platform=web` to the `returnUrl`, `cancelUrl`, and `failureUrl`:
+
+```php
+$platform = 'mobile'; // or 'web', determined by your request context
+
+SmilePay::standardCheckout()->initiate([
+    'amount'            => 100.00,
+    'itemName'          => 'Order #123',
+    'returnUrl'         => url('/smilepay/return') . '?platform=' . $platform,
+    'cancelUrl'         => url('/smilepay/return') . '?platform=' . $platform,
+    'failureUrl'        => url('/smilepay/return') . '?platform=' . $platform,
+    // resultUrl is always server-to-server — no platform param needed
+]);
+```
+
+The `ReturnController` reads `?platform=` and picks the matching configured URL:
+
+| `?platform=` | Uses config key | `.env` variable |
+|---|---|---|
+| `mobile` | `smilepay.mobile_return_url` | `SMILEPAY_MOBILE_RETURN_URL` |
+| `web` | `smilepay.web_return_url` | `SMILEPAY_WEB_RETURN_URL` |
+| *(absent)* | `smilepay.app_return_url` | `SMILEPAY_APP_RETURN_URL` |
+
+If none match, a JSON response is returned.
+
+### Return URL Query Parameters
+
+Regardless of which URL is used, the following query parameters are always appended:
+
+| Parameter | Values | Description |
+|---|---|---|
+| `status` | `success`, `failed`, `cancelled`, `pending` | Payment outcome |
+| `orderReference` | string | Your order reference |
+| `message` | string | Human-readable status message (only on non-success) |
+
+---
 
 ## Usage
 
@@ -268,14 +380,12 @@ $isFailed = SmilePay::utility()->isPaymentFailed('ORDER-REF');
 
 ### Webhook Handling
 
-The package automatically registers a webhook route at `/smilepay/webhook`.
+The package automatically registers a webhook route at `/smilepay/webhook` and sets it as the default `resultUrl` on every payment request — no manual configuration required.
 
-#### Set Webhook URL
+To verify the route is registered:
 
-In your SmilePay dashboard or during payment initiation, set your `resultUrl` to:
-
-```
-https://yourdomain.com/smilepay/webhook
+```bash
+php artisan route:list --name=smilepay
 ```
 
 #### Listen to Payment Events
@@ -594,10 +704,10 @@ is not available. Please verify the API endpoint or contact support.
 
 ### Webhook Not Receiving Callbacks
 
-- Ensure your `resultUrl` is publicly accessible (use ngrok for local testing)
-- Check that the route is registered: `php artisan route:list | grep smilepay`
-- Verify webhook middleware in `config/smilepay.php`
-- Check your server's firewall allows incoming requests
+- The `resultUrl` is auto-set to `{APP_URL}/smilepay/webhook` — ensure your `APP_URL` in `.env` is publicly accessible (use [ngrok](https://ngrok.com) for local testing)
+- Verify both routes are registered: `php artisan route:list --name=smilepay`
+- Check webhook middleware in `config/smilepay.php`
+- Check your server's firewall allows incoming POST requests
 
 ### Payment Status Not Updating
 
