@@ -66,13 +66,19 @@ class ReturnController
     }
 
     /**
-     * Respond to the return. If the consuming app has set SMILEPAY_APP_RETURN_URL,
-     * redirect there with status/reference as query params so the app can handle navigation
-     * (e.g. deep-link back to the mobile app). Otherwise return JSON.
+     * Respond to the return. Redirects to the platform-specific app return URL
+     * (mobile deep-link or web HTTPS URL) with status/reference as query params.
+     * Falls back to the generic app_return_url, then JSON if none are configured.
      */
     protected function respond(string $status, ?string $orderReference, string $message = '')
     {
-        $appReturnUrl = config('smilepay.app_return_url');
+        $platform = request()->get('platform');
+
+        $appReturnUrl = match ($platform) {
+            'mobile' => config('smilepay.mobile_return_url'),
+            'web'    => config('smilepay.web_return_url'),
+            default  => null,
+        } ?? config('smilepay.app_return_url');
 
         if ($appReturnUrl) {
             $params = http_build_query(array_filter([

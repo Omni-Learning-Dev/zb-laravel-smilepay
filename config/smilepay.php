@@ -98,18 +98,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | App Return URL (optional)
+    | App Return URLs (optional)
     |--------------------------------------------------------------------------
     |
     | After the package's /smilepay/return route processes the payment status,
     | it will redirect here with ?status=success|failed|cancelled&orderReference=...
-    | appended. Useful for redirecting back to a mobile app deep-link, e.g.:
-    |   SMILEPAY_APP_RETURN_URL=errandrunner://payments/return
+    | appended.
     |
-    | Leave null to return a JSON response instead (useful for SPAs/APIs).
+    | Use platform-specific URLs when serving both a mobile app and a web app:
+    |   SMILEPAY_MOBILE_RETURN_URL=errandrunner://payments/return  (deep link)
+    |   SMILEPAY_WEB_RETURN_URL=https://example.com/payments/return (HTTPS)
+    |
+    | SMILEPAY_APP_RETURN_URL is kept for backward compatibility and is used as
+    | the fallback when no platform-specific URL matches.
+    |
+    | The consuming app signals the platform by appending ?platform=mobile or
+    | ?platform=web to the returnUrl / cancelUrl / failureUrl it sends to ZB.
+    | The package's ReturnController reads this and picks the right redirect URL.
+    |
+    | Leave all three null to return a JSON response instead.
     |
     */
     'app_return_url' => env('SMILEPAY_APP_RETURN_URL', null),
+    'mobile_return_url' => env('SMILEPAY_MOBILE_RETURN_URL', null),
+    'web_return_url' => env('SMILEPAY_WEB_RETURN_URL', null),
 
     /*
     |--------------------------------------------------------------------------
