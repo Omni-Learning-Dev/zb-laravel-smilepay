@@ -61,6 +61,32 @@ class SmilePayServiceProvider extends ServiceProvider
 
         // Register routes
         $this->registerRoutes();
+
+        // Fill in default callback URLs from the app URL so apps work without extra .env config
+        $this->setDefaultCallbackUrls();
+    }
+
+    /**
+     * Auto-configure callback URLs using the app's base URL if not explicitly set.
+     * result_url  → the package's own webhook endpoint (server-to-server from ZB)
+     * return_url  → the package's return page (user redirect after hosted checkout)
+     * cancel_url  → same return page (user cancelled)
+     * failure_url → same return page (payment failed)
+     */
+    protected function setDefaultCallbackUrls(): void
+    {
+        if (! config('smilepay.result_url')) {
+            config(['smilepay.result_url' => url('/smilepay/webhook')]);
+        }
+        if (! config('smilepay.return_url')) {
+            config(['smilepay.return_url' => url('/smilepay/return')]);
+        }
+        if (! config('smilepay.cancel_url')) {
+            config(['smilepay.cancel_url' => url('/smilepay/return')]);
+        }
+        if (! config('smilepay.failure_url')) {
+            config(['smilepay.failure_url' => url('/smilepay/return')]);
+        }
     }
 
     /**

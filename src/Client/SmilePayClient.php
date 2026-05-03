@@ -19,7 +19,13 @@ class SmilePayClient
     public function __construct()
     {
         $environment = config('smilepay.environment', 'sandbox');
-        $this->baseUrl = config("smilepay.base_url.{$environment}");
+        $rawBaseUrl = config("smilepay.base_url.{$environment}");
+
+        if (empty($rawBaseUrl)) {
+            throw new SmilePayException('SmilePay base URL is not configured.');
+        }
+
+        $this->baseUrl = rtrim($rawBaseUrl, '/') . '/';
         $this->apiKey = config('smilepay.api_key');
         $this->apiSecret = config('smilepay.api_secret');
         $this->loggingEnabled = config('smilepay.logging.enabled', false);
@@ -53,15 +59,17 @@ class SmilePayClient
     public function post(string $endpoint, array $data = []): array
     {
         try {
-            $this->logRequest('POST', $endpoint, $data);
+            $normalizedEndpoint = $this->prepareEndpoint($endpoint);
 
-            $response = $this->client->post($endpoint, [
+            $this->logRequest('POST', $normalizedEndpoint, $data);
+
+            $response = $this->client->post($normalizedEndpoint, [
                 'json' => $data,
             ]);
 
             $body = json_decode($response->getBody()->getContents(), true);
 
-            $this->logResponse($endpoint, $body);
+            $this->logResponse($normalizedEndpoint, $body);
 
             return $body;
         } catch (GuzzleException $e) {
@@ -82,15 +90,17 @@ class SmilePayClient
     public function get(string $endpoint, array $params = []): array
     {
         try {
-            $this->logRequest('GET', $endpoint, $params);
+            $normalizedEndpoint = $this->prepareEndpoint($endpoint);
 
-            $response = $this->client->get($endpoint, [
+            $this->logRequest('GET', $normalizedEndpoint, $params);
+
+            $response = $this->client->get($normalizedEndpoint, [
                 'query' => $params,
             ]);
 
             $body = json_decode($response->getBody()->getContents(), true);
 
-            $this->logResponse($endpoint, $body);
+            $this->logResponse($normalizedEndpoint, $body);
 
             return $body;
         } catch (GuzzleException $e) {
@@ -183,7 +193,7 @@ class SmilePayClient
         $statusCode = 0;
         $errorMessage = 'An unexpected error occurred while communicating with SmilePay API.';
         $context = [
-            'endpoint' => $endpoint,
+            'endpoint' => $this->prepareEndpoint($endpoint),
             'method' => $method,
         ];
 
@@ -222,6 +232,17 @@ class SmilePayClient
         }
 
         return new SmilePayException($errorMessage, $statusCode, $exception, $context);
+    }
+
+    /**
+     * Ensure endpoints remain relative to the configured base URI.
+     *
+     * @param string $endpoint
+     * @return string
+     */
+    protected function prepareEndpoint(string $endpoint): string
+    {
+        return ltrim($endpoint, '/');
     }
 
     /**

@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(git tag -a v0.1.2 -m \"Release v0.1.2 - Improved error handling with user-friendly messages\")",
-      "Bash(git push origin v0.1.2)"
+      "Bash(git push origin v0.1.2)",
+      "Bash(git tag -a v0.1.3 -m \"Release v0.1.3 - Fix error logging to show user-friendly messages\")",
+      "Bash(git push origin v0.1.3)",
+      "Bash(git add config/smilepay.php)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix API base URL to include trailing slash\n\nFixed critical issue where API requests were failing with 404 errors\ndue to incorrect URL construction.\n\n**Problem:**\n- Base URL: https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway\n- Endpoint: /payments/express-checkout/ecocash\n- Result: https://zbnet.zb.co.zw/payments/express-checkout/ecocash (WRONG!)\n- Guzzle was dropping the ''payments-gateway'' segment\n\n**Solution:**\n- Added trailing slash to base URLs\n- Base URL: https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway/\n- Endpoint: /payments/express-checkout/ecocash\n- Result: https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway/payments/express-checkout/ecocash (CORRECT!)\n\n**Changes:**\n- Updated sandbox base URL to include trailing slash\n- Updated production base URL to include trailing slash\n\nThis ensures proper URL concatenation by Guzzle HTTP client.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git tag -a v0.1.4 -m \"Release v0.1.4 - Fix API base URL trailing slash (critical bug fix)\")",
+      "Bash(git push origin v0.1.4)",
+      "Read(//c/Users/Greats Sys/Documents/GitHub/Thando/**)",
+      "Bash(composer show emmanuelsiziba/zb-laravel-smilepay)",
+      "Bash(cat composer.lock)",
+      "Bash(composer install)",
+      "Bash(php artisan tinker --execute=\"dd(config(''smilepay.base_url''));\")",
+      "Bash(php artisan route:list --path=ecocash)",
+      "Bash(git add src/Services/ExpressCheckout.php src/Services/StandardCheckout.php src/Services/PaymentUtility.php README.md CHANGELOG.md)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix critical URL construction bug with Guzzle endpoints\n\nFixed 404 errors caused by leading slashes in API endpoints when combined\nwith trailing slash in base URL. Guzzle treats paths with leading slashes\nas absolute paths, causing it to ignore the base URL''s path component.\n\n**Problem:**\n- Base URL: https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway/\n- Endpoint: /payments/express-checkout/ecocash\n- Guzzle result: https://zbnet.zb.co.zw/payments/express-checkout/ecocash (WRONG!)\n- Missing: payments-gateway segment\n\n**Solution:**\nRemoved leading slashes from all endpoints:\n- Endpoint: payments/express-checkout/ecocash\n- Guzzle result: https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway/payments/express-checkout/ecocash (CORRECT!)\n\n**Changes:**\n- ExpressCheckout.php: Fixed all express checkout endpoints (ecocash, innbucks, omari, smilecash, mpgs)\n- StandardCheckout.php: Fixed initiate-transaction endpoint\n- PaymentUtility.php: Fixed status check and cancel endpoints\n- README.md: Added troubleshooting notes about this fix\n- CHANGELOG.md: Documented the fix in v0.1.5\n\nThis resolves the \"Endpoint not found\" errors users were experiencing\nwith express checkout methods.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git tag -a v0.1.5 -m \"Release v0.1.5 - Fix critical URL construction bug with Guzzle\")",
+      "Bash(git push origin v0.1.5)"
     ],
     "deny": [],
     "ask": []
